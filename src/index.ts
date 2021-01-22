@@ -1,21 +1,26 @@
-import Fastify, { FastifyReply, FastifyRequest } from 'fastify'
+import "reflect-metadata";
+import { FastifyReply, FastifyRequest } from 'fastify'
 import mercurius, { IResolvers, MercuriusLoaders } from 'mercurius'
 import mercuriusCodegen from 'mercurius-codegen'
-const { makeExecutableSchema } = require('@graphql-tools/schema')
 
 import { loadFilesSync } from '@graphql-tools/load-files'
-import { mergeTypeDefs } from '@graphql-tools/merge'
+import dotenv from "dotenv";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { mergeTypeDefs } from "@graphql-tools/merge";
 
-////const schema = loadFilesSync('src/graphql/schema/**/*.gql', {}).map(String)
+
+dotenv.config();
 const typesArray = loadFilesSync('src/graphql/schema/**/*.gql', {}).map(String)
 
-typesArray 
-
-export const app = Fastify()
+const fastify = require('fastify')({
+  logger: true
+})
 
 const buildContext = async (req: FastifyRequest, _reply: FastifyReply) => {
+
   return {
     authorization: req.headers.authorization,
+    
   }
 }
 
@@ -27,21 +32,24 @@ declare module 'mercurius' {
 }
 
 const dogs = [
-  { name: 'Max' },
-  { name: 'Charlie' },
-  { name: 'Buddy' },
-  { name: 'Max' },
+  { name: 'Max', coat: 'Black' },
+  { name: 'Charlie', coat: 'Blue' },
+  { name: 'Buddy', coat: 'Brown' },
+  { name: 'Max', coat: 'Red' },
 ]
 
-const owners: Record<string, { name: string }> = {
+const owners: Record<string, { firstname: string, lastname: string }> = {
   Max: {
-    name: 'Jennifer',
+    firstname: 'Jennifer',
+    lastname: 'Doe'
   },
   Charlie: {
-    name: 'Sarah',
+    firstname: 'Sarah',
+    lastname: 'Reed'
   },
   Buddy: {
-    name: 'Tracy',
+    firstname: 'Tracy',
+    lastname: 'Johnson'
   },
 }
 
@@ -77,7 +85,6 @@ const resolvers: IResolvers = {
       ctx.authorization
       // info ~ GraphQLResolveInfo
       info
-
       return x + y
     },
     createNotification(_root, { message }, { pubsub }) {
@@ -106,25 +113,35 @@ const loaders: MercuriusLoaders = {
     },
   },
 }
-const typeDefs = mergeTypeDefs(typesArray)
 
-const schema =  makeExecutableSchema({ typeDefs, resolvers });
-//const schema = typeDefs;
-console.log(schema);
-app.register(mercurius, {
+const typeDefs = mergeTypeDefs(typesArray)
+const schema =  makeExecutableSchema({ typeDefs});
+
+mercuriusCodegen(fastify, {
+  targetPath: './src/graphql/generated.ts',
+  operationsGlob: './src/graphql/operations/*.gql',
+})
+
+fastify.register(mercurius, {
   schema,
- // resolvers,
+  resolvers,
   loaders,
   context: buildContext,
   subscription: true,
   graphiql: 'playground',
   ide: true,
   routes: true,
+  jit: 1,
 })
 
-mercuriusCodegen(app, {
-  targetPath: './src/graphql/generated.ts',
-  operationsGlob: './src/graphql/operations/*.gql',
-})
 
-app.listen(3000);
+const start = async () => {
+  try {
+    await fastify.listen(3000)
+  } catch (err) {
+    fastify.log.error(err)
+    process.exit(1)
+  }
+}
+start()
+console.log(`🚀  Server ready `)

@@ -1,3 +1,5 @@
 type Human {
-  name: String!
+  firstname: String!
+  lastname: String!
 }
+ 

@@ -33,20 +33,28 @@ export type Dog = {
   __typename?: "Dog";
   name: Scalars["String"];
   owner?: Maybe<Human>;
+  coat?: Maybe<Scalars["String"]>;
 };
 
 export type Human = {
   __typename?: "Human";
-  name: Scalars["String"];
+  firstname: Scalars["String"];
+  lastname: Scalars["String"];
 };
 
 export type Mutation = {
   __typename?: "Mutation";
   add: Scalars["Int"];
+  multiply: Scalars["Int"];
   createNotification: Scalars["Boolean"];
 };
 
 export type MutationaddArgs = {
+  x: Scalars["Int"];
+  y: Scalars["Int"];
+};
+
+export type MutationmultiplyArgs = {
   x: Scalars["Int"];
   y: Scalars["Int"];
 };
@@ -203,6 +211,7 @@ export type DogResolvers<
 > = {
   name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   owner?: Resolver<Maybe<ResolversTypes["Human"]>, ParentType, ContextType>;
+  coat?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -210,7 +219,8 @@ export type HumanResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Human"] = ResolversParentTypes["Human"]
 > = {
-  name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  firstname?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  lastname?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -223,6 +233,12 @@ export type MutationResolvers<
     ParentType,
     ContextType,
     RequireFields<MutationaddArgs, "x" | "y">
+  >;
+  multiply?: Resolver<
+    ResolversTypes["Int"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationmultiplyArgs, "x" | "y">
   >;
   createNotification?: Resolver<
     ResolversTypes["Boolean"],
@@ -289,10 +305,12 @@ export interface Loaders<
   Dog?: {
     name?: LoaderResolver<Scalars["String"], Dog, {}, TContext>;
     owner?: LoaderResolver<Maybe<Human>, Dog, {}, TContext>;
+    coat?: LoaderResolver<Maybe<Scalars["String"]>, Dog, {}, TContext>;
   };
 
   Human?: {
-    name?: LoaderResolver<Scalars["String"], Human, {}, TContext>;
+    firstname?: LoaderResolver<Scalars["String"], Human, {}, TContext>;
+    lastname?: LoaderResolver<Scalars["String"], Human, {}, TContext>;
   };
 }
 export type helloQueryVariables = Exact<{ [key: string]: never }>;
@@ -306,12 +324,24 @@ export type addMutationVariables = Exact<{
 
 export type addMutation = { __typename?: "Mutation" } & Pick<Mutation, "add">;
 
+export type multiplyMutationVariables = Exact<{
+  x: Scalars["Int"];
+  y: Scalars["Int"];
+}>;
+
+export type multiplyMutation = { __typename?: "Mutation" } & Pick<
+  Mutation,
+  "add"
+>;
+
 export type dogsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type dogsQuery = { __typename?: "Query" } & {
   dogs: Array<
-    { __typename?: "Dog" } & Pick<Dog, "name"> & {
-        owner?: Maybe<{ __typename?: "Human" } & Pick<Human, "name">>;
+    { __typename?: "Dog" } & Pick<Dog, "name" | "coat"> & {
+        owner?: Maybe<
+          { __typename?: "Human" } & Pick<Human, "firstname" | "lastname">
+        >;
       }
   >;
 };
@@ -396,6 +426,58 @@ export const addDocument: DocumentNode<addMutation, addMutationVariables> = {
     },
   ],
 };
+export const multiplyDocument: DocumentNode<
+  multiplyMutation,
+  multiplyMutationVariables
+> = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "multiply" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "x" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "y" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "add" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "x" },
+                value: { kind: "Variable", name: { kind: "Name", value: "x" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "y" },
+                value: { kind: "Variable", name: { kind: "Name", value: "y" } },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+};
 export const dogsDocument: DocumentNode<dogsQuery, dogsQueryVariables> = {
   kind: "Document",
   definitions: [
@@ -413,13 +495,21 @@ export const dogsDocument: DocumentNode<dogsQuery, dogsQueryVariables> = {
               kind: "SelectionSet",
               selections: [
                 { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "coat" } },
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "owner" },
                   selectionSet: {
                     kind: "SelectionSet",
                     selections: [
-                      { kind: "Field", name: { kind: "Name", value: "name" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "firstname" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "lastname" },
+                      },
                     ],
                   },
                 },

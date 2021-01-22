@@ -6,11 +6,17 @@ mutation add($x: Int!, $y: Int!) {
   add(x: $x, y: $y)
 }
 
+mutation multiply($x: Int!, $y: Int!) {
+  add(x: $x, y: $y)
+}
+
 query dogs {
   dogs {
     name
+    coat
     owner {
-      name
+      firstname
+      lastname
     }
   }
 }

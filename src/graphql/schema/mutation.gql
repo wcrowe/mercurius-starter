@@ -1,4 +1,5 @@
 type Mutation {
   add(x: Int!, y: Int!): Int!
+  multiply(x: Int!, y: Int!): Int!
   createNotification(message: String!): Boolean!
 }
