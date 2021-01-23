@@ -1,37 +1,64 @@
-import Fastify, { FastifyInstance, RouteShorthandOptions } from 'fastify'
-import { Server, IncomingMessage, ServerResponse } from 'http'
+import "reflect-metadata";
+import Fastify, { FastifyReply, FastifyRequest } from "fastify";
+import mercurius from "mercurius";
+import mercuriusCodegen from "mercurius-codegen";
+import { loadFilesSync } from "@graphql-tools/load-files";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { mergeTypeDefs } from "@graphql-tools/merge";
+import dotenv from "dotenv";
+import { resolvers } from "./resolvers";
+import { loaders } from "./loaders";
+import { FastifyInstance } from "fastify/types/instance";
 
-const server: FastifyInstance = Fastify({})
+dotenv.config();
+const PORT: number = Number(process.env.PORT) || 4000;
+const typesArray = loadFilesSync("src/graphql/schema/**/*.gql", {}).map(String);
 
-const opts: RouteShorthandOptions = {
-  schema: {
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          pong: {
-            type: 'string'
-          }
-        }
-      }
-    }
-  }
+const fastify: FastifyInstance = Fastify({ logger: true });
+
+const buildContext = async (req: FastifyRequest, _reply: FastifyReply) => {
+  return {
+    authorization: req.headers.authorization,
+  };
+};
+
+type PromiseType<T> = T extends PromiseLike<infer U> ? U : T;
+
+declare module "mercurius" {
+  interface MercuriusContext
+    extends PromiseType<ReturnType<typeof buildContext>> {}
 }
 
-server.get('/ping', opts, async (request, reply) => {
-  return { pong: 'it worked!' }
-})
+const typeDefs = mergeTypeDefs(typesArray);
+const schema = makeExecutableSchema({ typeDefs });
+
+mercuriusCodegen(fastify, {
+  targetPath: "./src/graphql/generated.ts",
+  operationsGlob: "./src/graphql/operations/*.gql",
+});
+
+fastify.register(mercurius, {
+  schema,
+  resolvers,
+  loaders,
+  context: buildContext,
+  subscription: true,
+  graphiql: "playground",
+  ide: true,
+  routes: true,
+  jit: 1,
+});
 
 const start = async () => {
   try {
-    await server.listen(3000)
+    await fastify.listen(PORT);
 
-    const address = server.server.address()
-    const port = typeof address === 'string' ? address : address?.port
-
+    const address = fastify.server.address();
+    //   const port = typeof address === 'string' ? address : address?.port
+    console.log(address);
   } catch (err) {
-    server.log.error(err)
-    process.exit(1)
+    fastify.log.error(err);
+    process.exit(1);
   }
-}
-start()
+};
+start();
