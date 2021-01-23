@@ -1,0 +1,27 @@
+type User {
+  id: ID!
+  firstname: String!
+  lastname: String!
+  email: String!
+  password: String!
+  phone: String
+  role: role
+  active: Boolean!
+}
+enum role {
+  ADMIN
+  USER
+}
+
+input UserInput {
+  password: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  role: role
+}
+
+type UserResponse {
+  errors: [Error!]
+  user: User
+}

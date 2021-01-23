@@ -1,14 +1,13 @@
 import { MercuriusLoaders } from "mercurius"
 
-
 const owners: Record<string, { firstname: string, lastname: string }> = {
     Max: {
       firstname: 'Jennifer',
       lastname: 'Doe'
     },
     Charlie: {
-      firstname: 'Sarah',
-      lastname: 'Reed'
+      firstname: 'Sue',
+      lastname: 'Hamilton'
     },
     Buddy: {
       firstname: 'Tracy',
@@ -23,4 +22,3 @@ export const loaders: MercuriusLoaders = {
       },
     },
 }
-

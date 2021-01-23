@@ -36,6 +36,12 @@ export type Dog = {
   coat?: Maybe<Scalars["String"]>;
 };
 
+export type Error = {
+  __typename?: "Error";
+  field: Scalars["String"];
+  message: Scalars["String"];
+};
+
 export type Human = {
   __typename?: "Human";
   firstname: Scalars["String"];
@@ -72,6 +78,37 @@ export type Query = {
 export type Subscription = {
   __typename?: "Subscription";
   newNotification: Scalars["String"];
+};
+
+export type User = {
+  __typename?: "User";
+  id: Scalars["ID"];
+  firstname: Scalars["String"];
+  lastname: Scalars["String"];
+  email: Scalars["String"];
+  password: Scalars["String"];
+  phone?: Maybe<Scalars["String"]>;
+  role?: Maybe<role>;
+  active: Scalars["Boolean"];
+};
+
+export enum role {
+  ADMIN = "ADMIN",
+  USER = "USER",
+}
+
+export type UserInput = {
+  password: Scalars["String"];
+  firstName: Scalars["String"];
+  lastName: Scalars["String"];
+  email: Scalars["String"];
+  role?: Maybe<role>;
+};
+
+export type UserResponse = {
+  __typename?: "UserResponse";
+  errors?: Maybe<Array<Error>>;
+  user?: Maybe<User>;
 };
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -185,24 +222,35 @@ export type DirectiveResolverFn<
 export type ResolversTypes = {
   Dog: ResolverTypeWrapper<Dog>;
   String: ResolverTypeWrapper<Scalars["String"]>;
+  Error: ResolverTypeWrapper<Error>;
   Human: ResolverTypeWrapper<Human>;
   Mutation: ResolverTypeWrapper<{}>;
   Int: ResolverTypeWrapper<Scalars["Int"]>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   Query: ResolverTypeWrapper<{}>;
   Subscription: ResolverTypeWrapper<{}>;
+  User: ResolverTypeWrapper<User>;
+  ID: ResolverTypeWrapper<Scalars["ID"]>;
+  role: role;
+  UserInput: UserInput;
+  UserResponse: ResolverTypeWrapper<UserResponse>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Dog: Dog;
   String: Scalars["String"];
+  Error: Error;
   Human: Human;
   Mutation: {};
   Int: Scalars["Int"];
   Boolean: Scalars["Boolean"];
   Query: {};
   Subscription: {};
+  User: User;
+  ID: Scalars["ID"];
+  UserInput: UserInput;
+  UserResponse: UserResponse;
 };
 
 export type DogResolvers<
@@ -212,6 +260,15 @@ export type DogResolvers<
   name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   owner?: Resolver<Maybe<ResolversTypes["Human"]>, ParentType, ContextType>;
   coat?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ErrorResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["Error"] = ResolversParentTypes["Error"]
+> = {
+  field?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  message?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -268,12 +325,43 @@ export type SubscriptionResolvers<
   >;
 };
 
+export type UserResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["User"] = ResolversParentTypes["User"]
+> = {
+  id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
+  firstname?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  lastname?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  email?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  password?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  phone?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  role?: Resolver<Maybe<ResolversTypes["role"]>, ParentType, ContextType>;
+  active?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type UserResponseResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["UserResponse"] = ResolversParentTypes["UserResponse"]
+> = {
+  errors?: Resolver<
+    Maybe<Array<ResolversTypes["Error"]>>,
+    ParentType,
+    ContextType
+  >;
+  user?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type Resolvers<ContextType = any> = {
   Dog?: DogResolvers<ContextType>;
+  Error?: ErrorResolvers<ContextType>;
   Human?: HumanResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
+  User?: UserResolvers<ContextType>;
+  UserResponse?: UserResponseResolvers<ContextType>;
 };
 
 /**
@@ -308,9 +396,30 @@ export interface Loaders<
     coat?: LoaderResolver<Maybe<Scalars["String"]>, Dog, {}, TContext>;
   };
 
+  Error?: {
+    field?: LoaderResolver<Scalars["String"], Error, {}, TContext>;
+    message?: LoaderResolver<Scalars["String"], Error, {}, TContext>;
+  };
+
   Human?: {
     firstname?: LoaderResolver<Scalars["String"], Human, {}, TContext>;
     lastname?: LoaderResolver<Scalars["String"], Human, {}, TContext>;
+  };
+
+  User?: {
+    id?: LoaderResolver<Scalars["ID"], User, {}, TContext>;
+    firstname?: LoaderResolver<Scalars["String"], User, {}, TContext>;
+    lastname?: LoaderResolver<Scalars["String"], User, {}, TContext>;
+    email?: LoaderResolver<Scalars["String"], User, {}, TContext>;
+    password?: LoaderResolver<Scalars["String"], User, {}, TContext>;
+    phone?: LoaderResolver<Maybe<Scalars["String"]>, User, {}, TContext>;
+    role?: LoaderResolver<Maybe<role>, User, {}, TContext>;
+    active?: LoaderResolver<Scalars["Boolean"], User, {}, TContext>;
+  };
+
+  UserResponse?: {
+    errors?: LoaderResolver<Maybe<Array<Error>>, UserResponse, {}, TContext>;
+    user?: LoaderResolver<Maybe<User>, UserResponse, {}, TContext>;
   };
 }
 export type helloQueryVariables = Exact<{ [key: string]: never }>;
