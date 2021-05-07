@@ -52,10 +52,7 @@ fastify.register(mercurius, {
 const start = async () => {
   try {
     await fastify.listen(PORT);
-
-    const address = fastify.server.address();
-    const port = address.port;
-    console.log(`🚀 is running on ${port}`);
+    console.log(`🚀 is running on ${PORT}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

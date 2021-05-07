@@ -1,5 +1,3 @@
-import { MercuriusContext } from "mercurius";
-import { FastifyReply } from "fastify";
 import { GraphQLResolveInfo } from "graphql";
 import { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
 export type Maybe<T> = T | null;
@@ -15,7 +13,9 @@ export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   args: TArgs,
   context: TContext,
   info: GraphQLResolveInfo
-) => Promise<DeepPartial<TResult>> | DeepPartial<TResult>;
+) =>
+  | Promise<import("mercurius-codegen").DeepPartial<TResult>>
+  | import("mercurius-codegen").DeepPartial<TResult>;
 export type RequireFields<T, K extends keyof T> = {
   [X in Exclude<keyof T, K>]?: T[X];
 } &
@@ -27,6 +27,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  _FieldSet: any;
 };
 
 export type Dog = {
@@ -260,7 +261,7 @@ export type DogResolvers<
   name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   owner?: Resolver<Maybe<ResolversTypes["Human"]>, ParentType, ContextType>;
   coat?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ErrorResolvers<
@@ -269,7 +270,7 @@ export type ErrorResolvers<
 > = {
   field?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   message?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type HumanResolvers<
@@ -278,7 +279,7 @@ export type HumanResolvers<
 > = {
   firstname?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   lastname?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MutationResolvers<
@@ -337,7 +338,7 @@ export type UserResolvers<
   phone?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   role?: Resolver<Maybe<ResolversTypes["role"]>, ParentType, ContextType>;
   active?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type UserResponseResolvers<
@@ -350,7 +351,7 @@ export type UserResponseResolvers<
     ContextType
   >;
   user?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = any> = {
@@ -376,9 +377,9 @@ type Loader<TReturn, TObj, TParams, TContext> = (
     params: TParams;
   }>,
   context: TContext & {
-    reply: FastifyReply;
+    reply: import("fastify").FastifyReply;
   }
-) => Promise<Array<DeepPartial<TReturn>>>;
+) => Promise<Array<import("mercurius-codegen").DeepPartial<TReturn>>>;
 type LoaderResolver<TReturn, TObj, TParams, TContext> =
   | Loader<TReturn, TObj, TParams, TContext>
   | {
@@ -388,7 +389,9 @@ type LoaderResolver<TReturn, TObj, TParams, TContext> =
       };
     };
 export interface Loaders<
-  TContext = MercuriusContext & { reply: FastifyReply }
+  TContext = import("mercurius").MercuriusContext & {
+    reply: import("fastify").FastifyReply;
+  }
 > {
   Dog?: {
     name?: LoaderResolver<Scalars["String"], Dog, {}, TContext>;
@@ -697,18 +700,8 @@ export const newNotificationDocument: DocumentNode<
     },
   ],
 };
-export type DeepPartial<T> = T extends Function
-  ? T
-  : T extends Array<infer U>
-  ? _DeepPartialArray<U>
-  : T extends object
-  ? _DeepPartialObject<T>
-  : T | undefined;
-
-interface _DeepPartialArray<T> extends Array<DeepPartial<T>> {}
-type _DeepPartialObject<T> = { [P in keyof T]?: DeepPartial<T[P]> };
-
 declare module "mercurius" {
-  interface IResolvers extends Resolvers<MercuriusContext> {}
+  interface IResolvers
+    extends Resolvers<import("mercurius").MercuriusContext> {}
   interface MercuriusLoaders extends Loaders {}
 }

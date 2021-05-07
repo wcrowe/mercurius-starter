@@ -36,7 +36,7 @@ exports.resolvers = {
             y;
             ctx.authorization;
             info;
-            return x + y;
+            return x * y;
         },
         createNotification(_root, { message }, { pubsub }) {
             pubsub.publish({
