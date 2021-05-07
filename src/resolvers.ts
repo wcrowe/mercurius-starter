@@ -1,5 +1,6 @@
 import { IResolvers } from "mercurius"
 
+
 const dogs = [
     { name: 'Max', coat: 'Black' },
     { name: 'Charlie', coat: 'Blue' },

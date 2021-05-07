@@ -54,8 +54,8 @@ const start = async () => {
     await fastify.listen(PORT);
 
     const address = fastify.server.address();
-    const port =  address.port
-    console.log(`Server is running on ${port}`);
+    const port = address.port;
+    console.log(`🚀 is running on ${port}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
